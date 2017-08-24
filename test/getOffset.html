@@ -2,9 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>$Title$</title>
+    <title>Title</title>
+    <style>
+        #content {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+        }
+    </style>
 </head>
 <body>
-$END$
+    <div id="content">hh</div>
+
+    <script src="../preparation/getOffset.js"></script>
+    <script>
+        console.log(getOffset(document.querySelector('#content')));
+    </script>
 </body>
 </html>

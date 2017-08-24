@@ -1,0 +1,144 @@
+// 依赖[getTerminalType]
+
+/**
+ * 获取系统信息
+ * @returns {string}
+ */
+function getSysInfo() {
+    var sysInfo = [];
+    // [手机、平板]
+    var terminalType = getTerminalType(),
+        viewWidth = getViewWidth(),
+        screenHeight = getScreenHeight();
+    if(terminalType == 1 || terminalType == 4) {
+        // 对于手机和平板，数值小的就是宽度，数值大的就是高度。永远统计竖屏状态
+        sysInfo.push("." + [viewWidth, screenHeight].sort()[0]);    // 屏幕宽度
+        sysInfo.push("." + [viewWidth, screenHeight].sort()[1]);    // 屏幕高度
+    }else{
+        sysInfo.push("." + viewWidth);   // 屏幕宽度
+        sysInfo.push("." + screenHeight);// 屏幕高度
+    }
+    sysInfo.push("." + (window.screen.colorDepth||0));        // 屏幕色深，取得屏幕信息（width*length*color）
+    sysInfo.push("." + this.getTimezone().replace(/\./g, "_"));  // 时区, 将小数点替换成_是为了不合信息串中的小数点冲突
+    sysInfo.push("." + (na.platform||"").replace(/\./g, "_").toLowerCase());                     // 取得系统平台
+    sysInfo.push("." + (na.language||na.browserLanguage||"").replace(/\./g, "_").toLowerCase()); // 取得浏览器语言
+    sysInfo.push("." + (doc.characterSet || doc.charset ||"").replace(/\./g, "_").toLowerCase());// 取得浏览器字符集
+    /*合并成URL传参时用的信息串*/
+    return sysInfo.join("");
+}
+
+/**
+ * 获取屏幕的高度（分辨率）
+ */
+function getScreenWidth() {
+    try {
+        return window.screen.width || 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+function getScreenHeight() {
+    try {
+        return window.screen.height || 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+/**
+ * 获取浏览器窗口的视口的高度（浏览器可视高度）
+ *
+ * 注意问题：
+ *  1. window.innerHeight 兼容性（2007年9月支持）、IE9以下以及怪异模式下无法使用
+ *  2. document.documentElement.clientHeight 获取值指向的内容
+ *  3. document.body.clientHeight 获取值指向的内容
+ * 处理逻辑（无法在怪癖模式<https://gaiheki-kakekomi.com/li2/sp/>下使用）：
+ *  （1）如果，window.innerHeight被提供，则其完全可信任；
+ *  （2）否则，document.documentElement.clientHeight > 0则使用它；
+ *  （3）最后，使用document.body.clientHeight
+ * 参考地址：
+ *  http://www.howtocreate.co.uk/tutorials/javascript/browserwindow
+ * 可以通过<meta http-equiv="X-UA-Compatible" content="IE=6">设置渲染方式
+ *
+ * 区分怪异模式：document.compatMode
+ *  - "BackCompat" 怪异模式；
+ *  - "CSS1Compat" 标准模式.
+ */
+function getBrowserHeight() {
+    var height = 0;
+    if (document.compatMode === 'BackCompat') {
+        // 怪异模式
+        height = window.innerHeight || document.body.clientHeight || document.documentElement.clientHeight;
+    } else {
+        // 标准模式
+        height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    }
+    return height;
+}
+
+
+
+/**
+ * 获取页面可视高度
+ * @returns {Number|number}
+ */
+function getViewWidth() {
+    try {
+        return self.innerWidth || document.body.clientWidth || 0;
+    } catch (ex) {
+        return 0;
+    }
+}
+
+/**
+ * 获取页面可视高度
+ * 注意：这里self.innerHeight获取的是浏览器可视窗口高度，如果body高度过小，存在问题
+ */
+function getViewHeight() {
+    try {
+        return self.innerHeight || document.body.clientHeight || 0;
+    } catch (ex) {
+        return 0;
+    }
+}
+
+/**
+ * 获取初始缩放值
+ * @returns {*}
+ */
+function getInitialScale() {
+    try {
+        var viewportContent = document.getElementsByName("viewport")[0].content;
+        return (viewportContent && viewportContent.match("initial-scale=\\d.\\d+").toString().split("=")[1]) || 1;
+    } catch (ex) {
+        return 1;
+    }
+}
+
+/**
+ * 获取页面内容实际高度
+ */
+function getPageHeight() {
+    try {
+        return document.body.scrollHeight || 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+/**
+ * 获取时区
+ * @returns {*}
+ */
+function getTimezone() {
+    try {
+        var timezoneOffset = new Date().getTimezoneOffset();
+        if(typeof timezoneOffset === "number") {
+            return "GMT" + (timezoneOffset  <= 0 ? "+" : "") + (timezoneOffset / 60 * -1);
+        }
+    } catch (ex) {
+        return "";
+    }
+    return "";
+}
